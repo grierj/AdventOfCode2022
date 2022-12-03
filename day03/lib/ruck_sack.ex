@@ -52,6 +52,13 @@ defmodule RuckSack do
   end
 
   @doc """
+  Given a list of two strings, convert them to sets and find the common characters
+
+  ## Examples
+
+      iex> RuckSack.find_common(["abcd", "defg"])
+      "d"
+
   """
   def find_common(item_pair) do
     MapSet.intersection(
@@ -60,6 +67,16 @@ defmodule RuckSack do
     )
   end
 
+  @doc """
+  Given a list of single characters, look up their score from our score agent, then sum
+  all the values together.
+
+  ## Examples
+
+      iex> RuckSack.get_score(["a", "b"])
+      3
+
+  """
   def get_score(item_list) do
     IO.inspect(item_list)
     Enum.map(item_list, fn x -> RuckSack.Score.get_score_for(x) end)
@@ -68,6 +85,16 @@ defmodule RuckSack do
 end
 
 defmodule RuckSack.Score do
+  @moduledoc """
+  An agent that generates a single copy of the score table for "global" state
+
+  We take the range of a-zA-Z and match it up to 1-52 and convert it to a map for
+  easy lookup.
+
+  This allows us to maintain a functional flow without either regenerating the score
+  table or having weird module constants.  This appears to be a standard way for
+  storing global datasets in elixir.
+  """
   use Agent
 
   def start_link() do

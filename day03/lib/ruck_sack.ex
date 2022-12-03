@@ -24,12 +24,10 @@ defmodule RuckSack do
     IO.puts(
       File.read!(Path.expand(Path.join("data", "input.txt")))
       |> String.split("\n")
-      |> Enum.reject(fn(x) -> x == "" end)
+      |> Enum.reject(fn x -> x == "" end)
       |> Enum.chunk_every(3)
-      |> IO.inspect()
       |> Enum.map(fn x -> find_common(x) end)
       |> Enum.map(fn x -> get_score(x) end)
-      |> IO.inspect()
       |> Enum.sum()
     )
   end
@@ -45,7 +43,7 @@ defmodule RuckSack do
   """
   def split_lines(line) do
     len = String.length(line)
-    IO.inspect(line)
+
     [
       String.slice(line, 0, div(len, 2)),
       String.slice(line, div(len, 2), len - 1)
@@ -62,9 +60,8 @@ defmodule RuckSack do
 
   """
   def find_common(items) do
-    Enum.map(items, fn(x) -> MapSet.new(String.graphemes(x)) end)
-    |> Enum.reduce(fn(x, acc) -> MapSet.intersection(x, acc) end)
-
+    Enum.map(items, fn x -> MapSet.new(String.graphemes(x)) end)
+    |> Enum.reduce(fn x, acc -> MapSet.intersection(x, acc) end)
   end
 
   @doc """
@@ -78,7 +75,6 @@ defmodule RuckSack do
 
   """
   def get_score(item_list) do
-    IO.inspect(item_list)
     Enum.map(item_list, fn x -> RuckSack.Score.get_score_for(x) end)
     |> Enum.sum()
   end
@@ -104,13 +100,14 @@ defmodule RuckSack.Score do
   def make_score_list do
     Enum.into(
       List.zip([
-      String.graphemes(List.to_string(Enum.to_list(?a..?z) ++ Enum.to_list(?A..?Z))),
-      Enum.to_list(1..52)
-    ]), %{})
+        String.graphemes(List.to_string(Enum.to_list(?a..?z) ++ Enum.to_list(?A..?Z))),
+        Enum.to_list(1..52)
+      ]),
+      %{}
+    )
   end
 
   def get_score_for(key) do
-    IO.inspect(key)
     Agent.get(__MODULE__, &Map.get(&1, key))
   end
 end

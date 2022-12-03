@@ -25,7 +25,8 @@ defmodule RuckSack do
       File.read!(Path.expand(Path.join("data", "input.txt")))
       |> String.split("\n")
       |> Enum.reject(fn(x) -> x == "" end)
-      |> Enum.map(fn x -> split_lines(x) end)
+      |> Enum.chunk_every(3)
+      |> IO.inspect()
       |> Enum.map(fn x -> find_common(x) end)
       |> Enum.map(fn x -> get_score(x) end)
       |> IO.inspect()
@@ -52,19 +53,18 @@ defmodule RuckSack do
   end
 
   @doc """
-  Given a list of two strings, convert them to sets and find the common characters
+  Given a list of strings, convert them to sets and find the common characters
 
   ## Examples
 
-      iex> RuckSack.find_common(["abcd", "defg"])
+      iex> RuckSack.find_common(["abcd", "defg", "dcvb"])
       "d"
 
   """
-  def find_common(item_pair) do
-    MapSet.intersection(
-      MapSet.new(String.graphemes(Enum.at(item_pair, 0))),
-      MapSet.new(String.graphemes(Enum.at(item_pair, 1)))
-    )
+  def find_common(items) do
+    Enum.map(items, fn(x) -> MapSet.new(String.graphemes(x)) end)
+    |> Enum.reduce(fn(x, acc) -> MapSet.intersection(x, acc) end)
+
   end
 
   @doc """

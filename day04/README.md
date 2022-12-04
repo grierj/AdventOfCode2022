@@ -1,4 +1,4 @@
-# RuckSack
+# CampCleanup
 
 **TODO: Add description**
 

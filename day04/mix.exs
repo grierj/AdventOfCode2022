@@ -1,4 +1,4 @@
-defmodule RuckSack.MixProject do
+defmodule CampCleanup.MixProject do
   use Mix.Project
 
   def project do

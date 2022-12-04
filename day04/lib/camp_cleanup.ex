@@ -1,6 +1,6 @@
-defmodule RuckSack do
+defmodule CampCleanup do
   @moduledoc """
-  Documentation for `RuckSack`.
+  Documentation for `CampCleanup`.
   """
 
   @doc """
@@ -8,7 +8,7 @@ defmodule RuckSack do
 
   ## Examples
 
-      iex> RuckSack.hello()
+      iex> CampCleanup.hello()
       :world
 
   """

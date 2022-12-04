@@ -14,6 +14,7 @@ defmodule CampCleanup do
   - print out that number of pairs
   """
 
+  @spec run :: :ok
   def run do
     IO.puts(
       File.read!(Path.expand(Path.join("data", "input.txt")))
@@ -25,6 +26,7 @@ defmodule CampCleanup do
     )
   end
 
+  @spec find_subset(any) :: 0 | 1
   def find_subset(pair) do
     [first_range, second_range] = Enum.map(pair, fn x -> str_range_to_map_set(x) end)
     cond do
@@ -34,7 +36,7 @@ defmodule CampCleanup do
     end
   end
 
-  @spec str_range_to_map_set(binary) :: MapSet
+  @spec str_range_to_map_set(binary) :: MapSet.t()
   def str_range_to_map_set(string) do
     [range_start, range_end] = String.split(string, "-")
     |> Enum.map(fn x -> String.to_integer(x) end)

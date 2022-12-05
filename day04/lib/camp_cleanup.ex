@@ -21,7 +21,7 @@ defmodule CampCleanup do
       |> String.split("\n")
       |> Enum.reject(fn x -> x == "" end)
       |> Enum.map(fn x -> String.split(x, ",") end)
-      |> Enum.map(fn x -> find_subset(x) end)
+      |> Enum.map(fn x -> find_overlaps(x) end)
       |> Enum.sum()
     )
   end
@@ -29,6 +29,7 @@ defmodule CampCleanup do
   @spec find_subset(any) :: 0 | 1
   def find_subset(pair) do
     [first_range, second_range] = Enum.map(pair, fn x -> str_range_to_map_set(x) end)
+
     cond do
       MapSet.subset?(first_range, second_range) -> 1
       MapSet.subset?(second_range, first_range) -> 1
@@ -36,11 +37,22 @@ defmodule CampCleanup do
     end
   end
 
-  @spec str_range_to_map_set(binary) :: MapSet.t()
-  def str_range_to_map_set(string) do
-    [range_start, range_end] = String.split(string, "-")
-    |> Enum.map(fn x -> String.to_integer(x) end)
-    MapSet.new(Range.new(range_start, range_end))
+  @spec find_overlaps(any) :: 0 | 1
+  def find_overlaps(pair) do
+    [first_range, second_range] = Enum.map(pair, fn x -> str_range_to_map_set(x) end)
+
+    cond do
+      MapSet.size(MapSet.intersection(first_range, second_range)) > 0 -> 1
+      true -> 0
+    end
   end
 
+  @spec str_range_to_map_set(binary) :: MapSet.t()
+  def str_range_to_map_set(string) do
+    [range_start, range_end] =
+      String.split(string, "-")
+      |> Enum.map(fn x -> String.to_integer(x) end)
+
+    MapSet.new(Range.new(range_start, range_end))
+  end
 end

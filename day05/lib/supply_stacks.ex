@@ -32,10 +32,8 @@ defmodule SupplyStacks do
       |> Enum.reject(fn x -> !String.match?(x, ~r/\d+/) end)
       |> Enum.map(fn x -> String.to_integer(x) end)
 
-    for _ <- 1..num do
-      SupplyStacks.Crates.pop_from_stack(from)
-      |> SupplyStacks.Crates.add_to_stack(to)
-    end
+    SupplyStacks.Crates.pop_from_stack(from, num)
+    |> SupplyStacks.Crates.add_to_stack(to)
   end
 
   def get_stack_tops() do
@@ -92,9 +90,10 @@ defmodule SupplyStacks.Crates do
     add_to_stack([crate], stack)
   end
 
-  def pop_from_stack(stack) do
-    {crate, new_stack} = List.pop_at(get_stack(stack), 0, nil)
-    Agent.update(__MODULE__, &Map.put(&1, stack, new_stack))
-    crate
+  def pop_from_stack(stack, num) do
+    curr_stack = get_stack(stack)
+    crates = Enum.take(curr_stack, num)
+    Agent.update(__MODULE__, &Map.put(&1, stack, Enum.slice(curr_stack, num..-1)))
+    crates
   end
 end

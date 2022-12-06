@@ -15,19 +15,22 @@ defmodule SupplyStacks do
   def run do
     SupplyStacks.Crates.start_link()
     load_initial_crates()
+
     File.read!(Path.expand(Path.join("data", "input.txt")))
     |> String.split("\n")
-    |> Enum.reject(fn(x) -> x == "" end)
+    |> Enum.reject(fn x -> x == "" end)
     |> Enum.map(fn x -> run_instructions(x) end)
+
     IO.puts(get_stack_tops())
     SupplyStacks.Crates.stop()
     :ok
   end
 
   def run_instructions(line) do
-    [num, from, to] = String.split(line)
-    |> Enum.reject(fn(x) -> !String.match?(x, ~r/\d+/) end)
-    |> Enum.map(fn x -> String.to_integer(x) end)
+    [num, from, to] =
+      String.split(line)
+      |> Enum.reject(fn x -> !String.match?(x, ~r/\d+/) end)
+      |> Enum.map(fn x -> String.to_integer(x) end)
 
     for _ <- 1..num do
       SupplyStacks.Crates.pop_from_stack(from)

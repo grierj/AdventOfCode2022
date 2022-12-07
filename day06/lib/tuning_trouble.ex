@@ -32,8 +32,8 @@ defmodule TuningTrouble do
 
     IO.puts(
       Enum.reduce_while(charlist, 0, fn {_, i}, _ ->
-        if i > 3 do
-          (Enum.slice(charlist, (i - 3)..i)
+        if i > 13 do
+          (Enum.slice(charlist, (i - 13)..i)
            |> Enum.map(fn {e, _} -> e end)
            |> list_has_dupes?() && {:cont, 0}) || {:halt, i + 1}
         else

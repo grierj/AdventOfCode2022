@@ -44,8 +44,6 @@ defmodule TuningTrouble do
   end
 
   def list_has_dupes?(list) do
-    IO.inspect(list)
-    IO.inspect(Enum.uniq(list))
     length(list) != length(Enum.uniq(list))
   end
 end

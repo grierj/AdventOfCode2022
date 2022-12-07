@@ -11,6 +11,9 @@ defmodule TuningTrouble do
   - zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw: first marker after character 11
 
   We'll just split our string into graphemes and look back 4 characters for duplicates.
+
+  In part 2 we just set our lookback to be 14 characters instead of 4, the solution remains
+  the same, only the config is different
   """
 
   @doc """

@@ -29,22 +29,26 @@ defmodule NoSpaceLeftOnDevice do
 
   Directory sizes include the size of files in it and the size of all files in the directories
   in it and so on.
+
+  Part 2 has us look for the smallest directory we can delete to free up enough space.  We
+  update the collect_dir_sizes function to generate the amount we need and then pass that along
+  to the actual recursive system
   """
-  alias NoSpaceLeftOnDevice.TotalSize
+  alias NoSpaceLeftOnDevice.DelSize
   alias NoSpaceLeftOnDevice.CWD
   @spec run :: any
   def run do
     CWD.start_link()
-    TotalSize.start_link()
+    DelSize.start_link()
 
     File.read!(Path.expand(Path.join("data", "input.txt")))
     |> collect_files()
     |> collect_dir_sizes()
 
-    IO.puts(TotalSize.get())
+    IO.puts(DelSize.get())
   after
     CWD.stop()
-    TotalSize.stop()
+    DelSize.stop()
   end
 
   def collect_files(commands) do
@@ -108,16 +112,26 @@ defmodule NoSpaceLeftOnDevice do
     |> roll_up_size(Enum.slice(atom_path, 0..-2), size)
   end
 
-  def collect_dir_sizes(dirlist, maxsize \\ 100_000) do
-    if Map.has_key?(dirlist, :size) && dirlist.size <= maxsize do
-      TotalSize.set(dirlist.size)
+  def collect_dir_sizes(dirlist) do
+    fs_size = 70_000_000
+    needed_size = 30_000_000
+    total_used = dirlist[:/].size
+    amount_to_del = needed_size - (fs_size - total_used)
+
+    collect_dir_sizes(dirlist, amount_to_del)
+  end
+
+  def collect_dir_sizes(dirlist, amount_to_del) do
+    if Map.has_key?(dirlist, :size) && dirlist.size > amount_to_del &&
+         dirlist.size < DelSize.get() do
+      DelSize.set(dirlist.size)
     end
 
     dirs = Map.keys(dirlist) |> List.delete(:size) |> List.delete(:files)
 
     if length(dirs) > 0 do
       for k <- dirs do
-        collect_dir_sizes(dirlist[k])
+        collect_dir_sizes(dirlist[k], amount_to_del)
       end
     end
   end
@@ -150,12 +164,12 @@ defmodule NoSpaceLeftOnDevice.CWD do
   end
 end
 
-defmodule NoSpaceLeftOnDevice.TotalSize do
+defmodule NoSpaceLeftOnDevice.DelSize do
   use Agent
 
   @spec start_link :: {:error, any} | {:ok, pid}
   def start_link() do
-    Agent.start_link(fn -> 0 end, name: __MODULE__)
+    Agent.start_link(fn -> 70_000_000 end, name: __MODULE__)
   end
 
   @spec stop :: :ok
@@ -164,7 +178,7 @@ defmodule NoSpaceLeftOnDevice.TotalSize do
   end
 
   def set(size) do
-    Agent.update(__MODULE__, fn x -> x + size end)
+    Agent.update(__MODULE__, fn _ -> size end)
   end
 
   def get() do

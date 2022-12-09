@@ -38,6 +38,7 @@ defmodule TreeHouse do
     |> length()
   end
 
+  @spec horizontal_search(list(list()), non_neg_integer(), non_neg_integer(), non_neg_integer(), fun()) :: any
   def horizontal_search(tree_rows, x, y, edge, row_func) do
     if x == edge do
       true
@@ -46,6 +47,23 @@ defmodule TreeHouse do
 
       Enum.reduce_while(row_func.(tree_rows, x, y), true, fn curr_tree, acc ->
         if curr_tree >= tree_height do
+          {:halt, false}
+        else
+          {:cont, acc}
+        end
+      end)
+    end
+  end
+
+  @spec vertical_search(list(list()), non_neg_integer(), non_neg_integer(), non_neg_integer(), fun()) :: any
+  def vertical_search(tree_rows, x, y, edge, row_func) do
+    if y == edge do
+      true
+    else
+      tree_height = get_tree_height(tree_rows, x, y)
+
+      Enum.reduce_while(row_func.(tree_rows, y), true, fn row, acc ->
+        if Enum.at(row, x) >= tree_height do
           {:halt, false}
         else
           {:cont, acc}
@@ -68,38 +86,14 @@ defmodule TreeHouse do
 
   @spec visible_from_top(list, non_neg_integer(), non_neg_integer()) :: boolean()
   def visible_from_top(tree_rows, x, y) do
-    if y == 0 do
-      IO.inspect({x, y}, label: "top edge")
-      true
-    else
-      tree_height = get_tree_height(tree_rows, x, y)
-
-      Enum.reduce_while(Enum.slice(tree_rows, 0..y-1), true, fn row, acc ->
-        if Enum.at(row, x) >= tree_height do
-          {:halt, false}
-        else
-          {:cont, acc}
-        end
-      end)
-    end
+    top_row_fn = fn(rows, y) -> Enum.slice(rows, 0..y-1) end
+    vertical_search(tree_rows, x, y, 0, top_row_fn)
   end
 
   @spec visible_from_bottom(list, non_neg_integer(), non_neg_integer()) :: boolean()
   def visible_from_bottom(tree_rows, x, y) do
-    if y == length(tree_rows) - 1 do
-      IO.inspect({x, y}, label: "bottom edge")
-      true
-    else
-      tree_height = get_tree_height(tree_rows, x, y)
-
-      Enum.reduce_while(Enum.reverse(Enum.slice(tree_rows, y+1..-1)), true, fn row, acc ->
-        if Enum.at(row, x) >= tree_height do
-          {:halt, false}
-        else
-          {:cont, acc}
-        end
-      end)
-    end
+    bottom_row_fn = fn(rows, y) -> Enum.reverse(Enum.slice(rows, y+1..-1)) end
+    vertical_search(tree_rows, x, y, length(tree_rows) - 1, bottom_row_fn)
   end
 
   @spec get_tree_height(list(list()), integer, integer) :: any

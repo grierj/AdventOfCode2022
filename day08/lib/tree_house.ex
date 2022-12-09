@@ -38,40 +38,32 @@ defmodule TreeHouse do
     |> length()
   end
 
-  @spec visible_from_left(list, non_neg_integer(), non_neg_integer()) :: boolean()
-  def visible_from_left(tree_rows, x, y) do
-    if x == 0 do
-      IO.inspect({x, y}, label: "left edge")
+  def horizontal_search(tree_rows, x, y, edge, row_func) do
+    if x == edge do
       true
     else
       tree_height = get_tree_height(tree_rows, x, y)
 
-      Enum.reduce(Enum.slice(Enum.at(tree_rows, y), 0..x - 1), true, fn curr_tree, acc ->
+      Enum.reduce_while(row_func.(tree_rows, x, y), true, fn curr_tree, acc ->
         if curr_tree >= tree_height do
-          false
+          {:halt, false}
         else
-          acc
+          {:cont, acc}
         end
       end)
     end
   end
 
+  @spec visible_from_left(list, non_neg_integer(), non_neg_integer()) :: boolean()
+  def visible_from_left(tree_rows, x, y) do
+    left_row_fn = fn(rows, x, y) -> Enum.slice(Enum.at(rows, y), 0..x - 1) end
+    horizontal_search(tree_rows, x, y, 0, left_row_fn)
+  end
+
   @spec visible_from_right(list, non_neg_integer(), non_neg_integer()) :: boolean()
   def visible_from_right(tree_rows, x, y) do
-    if x == length(Enum.at(tree_rows, y)) - 1 do
-      IO.inspect({x, y}, label: "right edge")
-      true
-    else
-      tree_height = get_tree_height(tree_rows, x, y)
-
-      Enum.reduce(Enum.reverse(Enum.slice(Enum.at(tree_rows, y), x + 1..-1)), true, fn curr_tree, acc ->
-        if curr_tree >= tree_height do
-          false
-        else
-          acc
-        end
-      end)
-    end
+    right_row_fn = fn(rows, x, y) -> Enum.reverse(Enum.slice(Enum.at(rows, y), x + 1..-1)) end
+    horizontal_search(tree_rows, x, y, length(Enum.at(tree_rows, y)) - 1, right_row_fn)
   end
 
   @spec visible_from_top(list, non_neg_integer(), non_neg_integer()) :: boolean()
@@ -82,11 +74,11 @@ defmodule TreeHouse do
     else
       tree_height = get_tree_height(tree_rows, x, y)
 
-      Enum.reduce(Enum.slice(tree_rows, 0..y-1), true, fn row, acc ->
+      Enum.reduce_while(Enum.slice(tree_rows, 0..y-1), true, fn row, acc ->
         if Enum.at(row, x) >= tree_height do
-          false
+          {:halt, false}
         else
-          acc
+          {:cont, acc}
         end
       end)
     end
@@ -100,11 +92,11 @@ defmodule TreeHouse do
     else
       tree_height = get_tree_height(tree_rows, x, y)
 
-      Enum.reduce(Enum.reverse(Enum.slice(tree_rows, y+1..-1)), true, fn row, acc ->
+      Enum.reduce_while(Enum.reverse(Enum.slice(tree_rows, y+1..-1)), true, fn row, acc ->
         if Enum.at(row, x) >= tree_height do
-          false
+          {:halt, false}
         else
-          acc
+          {:cont, acc}
         end
       end)
     end
